@@ -1,0 +1,406 @@
+/* ============================================================
+   style.css — Sakila Film Analytics Report
+   Tema: Biru Akademik — bersih, tegas, mudah dibaca
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── CSS Variables ── */
+:root {
+  --bg:          #f0f4f9;
+  --surface:     #ffffff;
+  --ink:         #0d1b2a;
+  --body-text:   #1e2d3d;
+  --muted:       #4a6080;
+
+  --blue-dark:   #0f3460;
+  --blue-mid:    #1a5fa8;
+  --blue-accent: #2d8bce;
+  --blue-light:  #dbeafe;
+  --blue-pale:   #eef4fb;
+
+  --teal:        #0e7490;
+  --border:      #b8d0e8;
+  --shadow:      0 3px 24px rgba(15,52,96,0.10);
+  --radius:      8px;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Body ── */
+body {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;           /* lebih tebal dari 400 */
+  font-size: 17px;            /* lebih besar */
+  line-height: 1.8;
+  color: var(--body-text);
+  background-color: var(--bg);
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================
+   TOC Layout Fix
+========================= */
+
+/* Geser isi utama ke kanan */
+.toc-content {
+  margin-left: 300px !important;
+}
+
+/* Sidebar TOC */
+#TOC {
+  position: fixed;
+  left: 20px;
+  top: 20px;
+  width: 260px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+
+  .toc-content {
+    margin-left: 0 !important;
+  }
+
+  #TOC {
+    position: relative;
+    width: 100%;
+    left: 0;
+    top: 0;
+    margin-bottom: 2rem;
+  }
+}
+
+/* Jarak konten dari TOC */
+body.toc-content {
+  padding-left: 320px !important;
+}
+
+/* TOC */
+#TOC {
+  width: 260px;
+  left: 20px;
+}
+
+/* Kolom konten — ambil sisa ruang */
+.col-xs-12.col-sm-8,
+.col-xs-12.col-sm-8.col-md-9 {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  padding-left: 12px !important;
+  padding-right: 0 !important;
+}
+
+/* ── Masthead ── */
+.title, h1.title {
+  font-family: 'Lora', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--blue-dark);
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.3px;
+}
+
+.author {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--blue-mid);
+  letter-spacing: 0.03em;
+  margin-bottom: 0.2rem;
+}
+
+.date {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ── Headings ── */
+h1, h2, h3, h4 {
+  font-family: 'Lora', serif;
+  line-height: 1.3;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--blue-dark);
+  border-bottom: 3px solid var(--blue-accent);
+  padding-bottom: 0.5rem;
+  margin-top: 3rem;
+  margin-bottom: 1.2rem;
+}
+
+h2 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  font-style: normal;
+  color: var(--blue-dark);
+  border-left: 5px solid var(--blue-accent);
+  padding-left: 0.9rem;
+  margin-top: 2.2rem;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 1.8rem;
+  margin-bottom: 0.6rem;
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ── Paragraphs ── */
+p {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--body-text);
+  margin-bottom: 1.1rem;
+  line-height: 1.85;
+}
+
+strong {
+  font-weight: 700;
+  color: var(--blue-dark);
+}
+
+em {
+  color: var(--teal);
+  font-style: italic;
+}
+
+/* ── HR ── */
+hr {
+  border: none;
+  border-top: 2px solid var(--blue-light);
+  margin: 2.5rem 0;
+}
+
+/* ── Lists ── */
+ul, ol {
+  padding-left: 1.6rem;
+  margin-bottom: 1.1rem;
+}
+
+li {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--body-text);
+  margin-bottom: 0.4rem;
+  line-height: 1.75;
+}
+
+ul li::marker { color: var(--blue-accent); font-size: 1.1em; }
+ol li::marker { color: var(--blue-accent); font-weight: 700; }
+
+/* ── Tables ── */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1.8rem 0 2.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+thead th {
+  background: var(--blue-dark);
+  color: #dbeafe;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.1rem;
+  text-align: left;
+  border-bottom: 2px solid var(--blue-accent);
+}
+
+tbody tr { transition: background 0.15s; }
+
+tbody tr:nth-child(even) { background-color: var(--blue-pale); }
+
+tbody tr:hover { background-color: var(--blue-light); }
+
+tbody td {
+  padding: 0.7rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--body-text);
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+tbody td:nth-child(n+2),
+thead th:nth-child(n+2) {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+}
+
+/* ── Code ── */
+pre, code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+}
+
+/* Input code block (source) */
+pre.r, pre.sourceCode, .sourceCode pre {
+  background: var(--blue-dark);
+  color: #cfe2f3;
+  border-radius: var(--radius);
+  padding: 1.3rem 1.6rem;
+  overflow-x: auto;
+  box-shadow: var(--shadow);
+  border-left: 5px solid var(--blue-accent);
+  margin: 1.2rem 0 0.4rem;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+/* R output block (## hasil summary, print, dll) */
+pre:not(.sourceCode):not(.r) {
+  background: #1c2f4a;
+  color: #e2edf8;
+  border-radius: var(--radius);
+  padding: 1.3rem 1.6rem;
+  overflow-x: auto;
+  box-shadow: var(--shadow);
+  border-left: 5px solid var(--teal);
+  margin: 0.2rem 0 1.8rem;
+  line-height: 1.75;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+code:not(pre code) {
+  background: var(--blue-light);
+  color: var(--blue-dark);
+  padding: 0.15em 0.45em;
+  border-radius: 4px;
+  font-size: 0.88em;
+  font-weight: 600;
+}
+
+/* ── Blockquote ── */
+blockquote {
+  margin: 1.8rem 0;
+  padding: 1.1rem 1.6rem;
+  background: var(--blue-pale);
+  border-left: 5px solid var(--blue-mid);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--blue-dark);
+  font-weight: 600;
+  font-style: italic;
+}
+
+blockquote p { margin: 0; font-size: 17px; }
+
+/* ── Figures ── */
+img, .plot {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.8rem auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+/* ── TOC ── */
+#TOC {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow);
+  width: 100%;
+  word-break: break-word;
+}
+
+#TOC > ul { margin: 0; padding-left: 0.4rem; }
+#TOC ul ul { padding-left: 0.8rem; }
+
+#TOC li {
+  line-height: 1.5;
+  margin-bottom: 0.2rem;
+}
+
+#TOC li a {
+  color: var(--blue-mid);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.87rem;
+  display: block;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+#TOC li a:hover { color: var(--blue-accent); font-weight: 700; }
+#TOC .active > a { color: var(--blue-accent); font-weight: 700; }
+
+#TOC::before {
+  content: "Daftar Isi";
+  display: block;
+  font-family: 'Lora', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--blue-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--blue-light);
+}
+
+/* ── Section Numbers ── */
+.header-section-number {
+  color: var(--blue-accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88em;
+  font-weight: 600;
+  margin-right: 0.45em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .container-fluid.main-container { padding: 1.2rem 1.3rem 3rem; }
+  .title, h1.title { font-size: 1.8rem; }
+  h1 { font-size: 1.55rem; }
+  h2 { font-size: 1.3rem; }
+  body, p, li { font-size: 16px; }
+  pre { font-size: 0.78rem; padding: 1rem 1.1rem; }
+  thead th, tbody td { padding: 0.55rem 0.7rem; font-size: 0.85rem; }
+}
+
+/* ── Print ── */
+@media print {
+  body { background: white; font-size: 14px; }
+  pre { box-shadow: none; border: 1px solid var(--border); }
+  table { box-shadow: none; }
+}

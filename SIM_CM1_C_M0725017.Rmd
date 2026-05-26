@@ -1,0 +1,523 @@
+---
+title: "Analisis Komprehensif Performa Kategori Film pada Database Sakila"
+author: "Rachel Janata Giorgina Ibrahim - M0725017 - C"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    number_sections: true
+    css: style.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(DBI)
+library(RMySQL)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(scales)
+library(plotly)
+```
+
+# Pendahuluan
+
+## Latar Belakang
+
+Perkembangan teknologi informasi telah mendorong perusahaan untuk memanfaatkan data sebagai dasar pengambilan keputusan bisnis. Dalam industri penyewaan film, data transaksi pelanggan dapat memberikan informasi penting mengenai preferensi konsumen, pola penyewaan, hingga kategori film yang paling diminati.
+
+Database Sakila merupakan database simulasi yang dikembangkan oleh MySQL untuk menggambarkan proses bisnis perusahaan rental film. Database ini terdiri dari berbagai tabel relasional yang memuat data pelanggan, pembayaran, film, kategori, inventori, serta histori penyewaan.
+
+Analisis terhadap database Sakila penting dilakukan untuk mengetahui kategori film mana yang memiliki performa terbaik berdasarkan total pendapatan dan frekuensi penyewaan. Informasi ini dapat menjadi dasar dalam penyusunan strategi bisnis yang lebih efektif.
+
+Melalui visualisasi data dan analisis statistik, perusahaan dapat memahami perilaku pelanggan secara lebih akurat sehingga keputusan yang diambil bersifat data-driven.
+
+---
+
+## Rumusan Masalah
+
+Penelitian ini bertujuan menjawab pertanyaan berikut:
+
+- Kategori film apa yang menghasilkan pendapatan terbesar?
+- Kategori film apa yang paling sering disewa?
+- Apakah jumlah rental berpengaruh terhadap total pendapatan?
+- Bagaimana distribusi performa kategori film dalam database Sakila?
+
+---
+
+## Tujuan Analisis
+
+Tujuan analisis ini adalah:
+
+- Mengidentifikasi kategori film dengan pendapatan tertinggi
+- Menentukan kategori dengan jumlah rental terbesar
+- Mengukur hubungan antara jumlah rental dan total pendapatan
+- Memberikan rekomendasi bisnis berbasis hasil analisis data
+
+---
+
+# Koneksi Database
+
+```{r, include=FALSE}
+con <- dbConnect(
+  MySQL(),
+  user = "root",
+  password = "agustus_123#",
+  dbname = "sakila",
+  host = "127.0.0.1",
+  port = 3306
+)
+
+dbListTables(con)
+```
+
+```r
+con <- dbConnect(
+  MySQL(),
+  user = "root",
+  password = db_password,
+  dbname = "sakila",
+  host = "127.0.0.1",
+  port = 3306
+)
+```
+
+Database berhasil terkoneksi dengan MySQL dan dapat digunakan untuk proses analisis data.
+
+---
+
+# Pengambilan Data
+
+Analisis dilakukan menggunakan join beberapa tabel:
+
+- category
+- film_category
+- film
+- inventory
+- rental
+- payment
+
+Variabel numerik:
+
+- jumlah_rental
+- total_pendapatan
+- rata_transaksi
+
+Jumlah observasi:
+
+16 kategori film.
+
+```{r, warning=FALSE}
+query <- "
+SELECT 
+    c.name AS kategori,
+    COUNT(r.rental_id) AS jumlah_rental,
+    SUM(p.amount) AS total_pendapatan,
+    AVG(p.amount) AS rata_transaksi
+FROM category c
+JOIN film_category fc ON c.category_id = fc.category_id
+JOIN film f ON fc.film_id = f.film_id
+JOIN inventory i ON f.film_id = i.film_id
+JOIN rental r ON i.inventory_id = r.inventory_id
+JOIN payment p ON r.rental_id = p.rental_id
+GROUP BY c.name
+ORDER BY total_pendapatan DESC
+"
+data <- dbGetQuery(con, query)
+
+kable(data)
+```
+
+Tabel di atas menunjukkan performa masing-masing kategori film berdasarkan total transaksi penyewaan.
+
+---
+
+# Statistik Deskriptif
+
+```{r}
+summary(data)
+```
+
+Statistik deskriptif digunakan untuk memberikan gambaran umum mengenai karakteristik data pada setiap kategori film dalam database Sakila. Analisis ini mencakup nilai minimum, kuartil pertama, median, rata-rata (mean), kuartil ketiga, dan nilai maksimum.
+
+## Rumus Mean (Rata-rata)
+
+$$
+\bar{x} = \frac{\sum_{i=1}^{n}x_i}{n}
+$$
+
+Keterangan:
+
+- $\bar{x}$ = rata-rata data
+- $x_i$ = nilai observasi ke-i
+- $n$ = jumlah observasi
+
+Rata-rata digunakan untuk mengetahui kecenderungan pusat distribusi data.
+
+---
+
+## Rumus Median
+
+Jika jumlah data ganjil:
+
+$$
+Me = x_{\left(\frac{n+1}{2}\right)}
+$$
+
+Jika jumlah data genap:
+
+$$
+Me = \frac{x_{\left(\frac{n}{2}\right)} + x_{\left(\frac{n}{2}+1\right)}}{2}
+$$
+
+Median merupakan nilai tengah setelah data diurutkan.
+
+---
+
+## Rumus Kuartil
+
+Kuartil bawah:
+
+$$
+Q_1 = \frac{n+1}{4}
+$$
+
+Kuartil tengah:
+
+$$
+Q_2 = Me
+$$
+
+Kuartil atas:
+
+$$
+Q_3 = \frac{3(n+1)}{4}
+$$
+
+Kuartil digunakan untuk membagi data menjadi empat bagian yang sama besar.
+
+---
+
+## Interpretasi Hasil Statistik Deskriptif
+
+Berdasarkan output statistik deskriptif terhadap 16 kategori film, diperoleh hasil sebagai berikut.
+
+Pada variabel jumlah_rental, nilai minimum tercatat sebesar 830, sedangkan nilai maksimum mencapai 1179. Nilai rata-rata sebesar 1002,8 dengan median 1001,0. Nilai mean yang sangat dekat dengan median menunjukkan bahwa distribusi jumlah rental relatif stabil dan seimbang. Hal ini menunjukkan bahwa sebagian besar kategori film memiliki tingkat penyewaan yang cukup merata. Nilai kuartil pertama sebesar 939,8 menunjukkan bahwa sekitar 25% kategori memiliki jumlah rental di bawah angka tersebut. Sedangkan kuartil ketiga sebesar 1097,2 menunjukkan bahwa 25% kategori terbaik memiliki jumlah rental di atas angka tersebut. Rentang antara nilai minimum dan maksimum menunjukkan adanya variasi performa antar kategori, meskipun perbedaannya tidak terlalu ekstrem. 
+
+Pada variabel total_pendapatan, nilai minimum sebesar 3418, sedangkan nilai maksimum mencapai 5314, dengan rata-rata sebesar 4213 dan median 4276. Nilai maksimum ini menunjukkan bahwa kategori Sports merupakan kategori dengan kontribusi pendapatan tertinggi dibandingkan kategori lainnya. Perbedaan cukup besar antara nilai minimum dan maksimum menunjukkan adanya ketimpangan kontribusi pendapatan antar kategori film. Median yang sedikit lebih tinggi daripada mean menunjukkan bahwa sebagian besar kategori memiliki performa cukup baik, namun terdapat beberapa kategori dengan pendapatan rendah yang menurunkan rata-rata keseluruhan.
+
+Pada variabel rata_transaksi, nilai minimum tercatat sebesar 3,856, sedangkan nilai maksimum sebesar 4,658, dengan rata-rata 4,206 dan median 4,188. Hal ini menunjukkan bahwa variasi rata-rata nilai transaksi antar kategori relatif kecil. Dengan demikian, perbedaan pendapatan antar kategori lebih banyak dipengaruhi oleh frekuensi rental dibandingkan perbedaan nominal transaksi.
+
+Secara keseluruhan, hasil statistik deskriptif menunjukkan bahwa kategori Sports memiliki performa paling dominan baik dari sisi jumlah rental maupun total pendapatan. Temuan ini mengindikasikan bahwa kategori Sports merupakan kategori yang paling diminati pelanggan sekaligus menjadi sumber pendapatan utama pada database Sakila. Hal ini menunjukkan bahwa perusahaan perlu memprioritaskan pengembangan inventori kategori Sports untuk mempertahankan pertumbuhan pendapatan di masa mendatang.
+
+---
+
+# Visualisasi Total Pendapatan per Kategori
+
+```{r}
+p1 <- ggplot(data,
+  aes(x = reorder(kategori, total_pendapatan),
+      y = total_pendapatan,
+      fill = total_pendapatan)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  scale_fill_gradient(low = "#bfdbfe", high = "#0a1f44") +
+  scale_y_continuous(labels = dollar) +
+  labs(
+    title = "Total Pendapatan per Kategori Film",
+    x = "Kategori Film",
+    y = "Pendapatan",
+    fill = "Pendapatan"
+  ) +
+  theme_minimal()
+
+ggplotly(p1)
+```
+
+Interpretasi Hasil Visualisasi Pendapatan
+
+Berdasarkan grafik di atas, kategori **Sports** terlihat sebagai kategori dengan total pendapatan tertinggi dibandingkan kategori lainnya.
+Hal ini menunjukkan bahwa kategori Sports memberikan kontribusi finansial terbesar terhadap keseluruhan pendapatan perusahaan rental film.
+Tingginya pendapatan kategori Sports menunjukkan bahwa pelanggan memiliki preferensi kuat terhadap film bertema olahraga.
+
+Kemungkinan penyebab tingginya performa kategori ini adalah:
+
+- koleksi film lebih beragam,
+- minat pelanggan tinggi,
+- frekuensi rental konsisten,
+- nilai transaksi stabil.
+
+Kategori Sports dapat dikategorikan sebagai aset utama perusahaan.
+
+Strategi yang direkomendasikan:
+
+- menambah inventori kategori Sports,
+- memberikan promosi loyalitas pelanggan,
+- meningkatkan variasi film sejenis.
+
+Sebaliknya, kategori dengan pendapatan terendah memiliki kontribusi kecil terhadap revenue.
+Hal ini menunjukkan kategori tersebut kurang diminati pelanggan atau memiliki koleksi terbatas.
+
+---
+
+# Visualisasi Jumlah Rental
+
+```{r}
+p2 <- ggplot(data,
+  aes(x = reorder(kategori, jumlah_rental),
+      y = jumlah_rental,
+      fill = jumlah_rental)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_gradient(low = "#bfdbfe", high = "#0a1f44") +
+  labs(
+    title = "Jumlah Rental per Kategori",
+    x = "Kategori",
+    y = "Jumlah Rental",
+    fill = "Rental"
+  ) +
+  theme_minimal()
+
+ggplotly(p2)
+```
+
+Interpretasi Hasil Visualisasi Rental
+
+Grafik menunjukkan bahwa kategori **Sports** juga memiliki jumlah rental tertinggi.
+Hal ini berarti dominasi kategori Sports bukan hanya karena harga transaksi tinggi, tetapi karena jumlah pelanggan yang melakukan penyewaan sangat besar.
+Kategori ini menunjukkan tingkat popularitas yang sangat tinggi.
+Konsistensi antara tingginya jumlah rental dan tingginya total pendapatan menunjukkan bahwa kategori Sports adalah kategori paling stabil secara bisnis.
+Kategori dengan jumlah rental rendah menunjukkan minimnya ketertarikan pelanggan.
+
+Kemungkinan penyebab:
+
+- promosi kurang efektif
+- koleksi kurang menarik
+- preferensi pasar rendah
+
+Kategori ini memerlukan evaluasi lebih lanjut.
+
+---
+
+# Analisis Hubungan Rental dan Pendapatan
+
+```{r}
+p3 <- ggplot(data,
+  aes(x = jumlah_rental,
+      y = total_pendapatan,
+      color = total_pendapatan)) +
+  geom_point(size = 4) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "#1e4d8c") +
+  geom_text(aes(label = kategori),
+            vjust = -1, size = 3,
+            color = "#0a1f44",
+            check_overlap = TRUE) +
+  scale_color_gradient(low = "#93c5fd", high = "#0a1f44") +
+  scale_y_continuous(labels = dollar) +
+  labs(
+    title = "Hubungan Frekuensi Rental dan Pendapatan",
+    x     = "Jumlah Rental",
+    y     = "Pendapatan",
+    color = "Pendapatan"
+  ) +
+  theme_minimal(base_family = "sans") +
+  theme(
+    plot.title       = element_text(color = "#0a1f44", face = "bold", size = 13),
+    axis.text        = element_text(color = "#1a2d48"),
+    axis.title       = element_text(color = "#1a2d48"),
+    panel.grid.major = element_line(color = "#dbeafe"),
+    panel.grid.minor = element_blank(),
+    legend.title     = element_text(color = "#1a2d48"),
+    plot.background  = element_rect(fill = "#f0f5ff", color = NA),
+    panel.background = element_rect(fill = "#f0f5ff", color = NA)
+  )
+
+ggplotly(p3)
+```
+
+Interpretasi Scatter Plot
+
+Kategori Sports berada pada posisi kanan atas grafik.
+Posisi ini menunjukkan bahwa Sports memiliki kombinasi ideal:
+
+- jumlah rental tinggi
+- pendapatan tinggi
+
+Ini menandakan kategori Sports merupakan kategori paling efisien dalam menghasilkan profit.
+Sebagian besar titik mengikuti arah garis regresi naik, menunjukkan adanya hubungan positif antara jumlah rental dan total pendapatan.
+Artinya, semakin tinggi frekuensi rental, maka semakin besar pendapatan yang dihasilkan.
+
+---
+
+# Korelasi Statistik
+
+```{r}
+cor(data$jumlah_rental,data$total_pendapatan)
+```
+
+$$
+r=
+\frac{\sum (x_i-\bar{x})(y_i-\bar{y})}
+{\sqrt{\sum(x_i-\bar{x})^2\sum(y_i-\bar{y})^2}}
+$$
+
+Interpretasi Korelasi
+
+Apabila nilai korelasi mendekati 1, maka hubungan antara jumlah rental dan pendapatan sangat kuat.
+Hal ini berarti peningkatan aktivitas rental akan berdampak langsung terhadap peningkatan pendapatan perusahaan.
+Hasil ini memperkuat temuan bahwa performa bisnis sangat dipengaruhi oleh tingkat permintaan pelanggan.
+
+---
+
+# Insight Bisnis
+
+Berdasarkan hasil analisis terhadap 16 kategori film pada database Sakila, performa kategori film dapat dianalisis berdasarkan jumlah rental, total pendapatan, dan rata-rata transaksi.
+
+
+---
+
+## Analisis Jumlah Rental
+
+Jumlah rental menunjukkan tingkat popularitas kategori film berdasarkan frekuensi penyewaan pelanggan.
+
+Kategori dengan jumlah rental tertinggi adalah:
+
+Sports (1179 transaksi)
+
+Animation (1166 transaksi)
+
+Action (1112 transaksi)
+
+Sci-Fi (1101 transaksi)
+
+Family (1096 transaksi)
+
+
+Hasil tersebut menunjukkan bahwa pelanggan paling banyak menyewa film pada kategori-kategori tersebut. Tingginya jumlah rental mengindikasikan bahwa kategori tersebut memiliki tingkat permintaan pasar yang sangat baik.
+
+Sebaliknya, kategori dengan jumlah rental terendah adalah:
+
+Music (830 transaksi)
+
+Travel (837 transaksi)
+
+Horror (846 transaksi)
+
+
+Kategori dengan jumlah rental rendah menunjukkan tingkat minat pelanggan yang lebih kecil dibandingkan kategori lainnya.
+
+
+---
+
+## Analisis Total Pendapatan
+
+Total pendapatan menunjukkan kontribusi masing-masing kategori terhadap revenue perusahaan rental film.
+
+Kategori dengan total pendapatan tertinggi adalah:
+
+Sports (5314.21)
+
+Sci-Fi (4756.98)
+
+Animation (4656.30)
+
+Drama (4587.39)
+
+Comedy (4383.58)
+
+
+Kategori Sports menjadi kategori dengan kontribusi pendapatan terbesar sekaligus kategori dengan jumlah rental tertinggi. Hal ini menunjukkan bahwa kategori Sports merupakan kategori paling unggul secara bisnis.
+
+Kategori dengan total pendapatan terendah adalah:
+
+Music (3417.72)
+
+Travel (3549.64)
+
+Classics (3639.59)
+
+
+Rendahnya pendapatan menunjukkan bahwa kategori tersebut belum mampu memberikan kontribusi revenue yang optimal bagi perusahaan.
+
+
+---
+
+## Analisis Rata-Rata Transaksi
+
+Rata-rata transaksi menunjukkan rata-rata nilai pembayaran yang dihasilkan dari setiap transaksi rental.
+
+Kategori dengan rata-rata transaksi tertinggi adalah:
+
+Comedy (4.658)
+
+New (4.629)
+
+Sports (4.507)
+
+Games (4.418)
+
+Horror (4.400)
+
+
+Hal ini menunjukkan bahwa setiap transaksi pada kategori tersebut cenderung menghasilkan nilai pembayaran yang lebih tinggi dibandingkan kategori lainnya.
+
+Sementara itu, kategori dengan rata-rata transaksi terendah adalah:
+
+Family (3.856)
+
+Children (3.868)
+
+Classics (3.876)
+
+
+Meskipun beberapa kategori memiliki jumlah rental cukup tinggi, nilai rata-rata transaksi yang rendah menyebabkan total pendapatan tidak terlalu besar.
+
+
+---
+
+## Hubungan Jumlah Rental dan Pendapatan
+
+Berdasarkan hasil visualisasi scatter plot dan analisis korelasi, terdapat hubungan positif antara jumlah rental dan total pendapatan.
+
+Artinya, semakin tinggi jumlah rental suatu kategori film, maka semakin besar pula total pendapatan yang dihasilkan. Kategori dengan performa terbaik umumnya memiliki kombinasi:
+
+jumlah rental tinggi
+
+total pendapatan tinggi
+
+rata-rata transaksi yang stabil
+
+
+Kategori Sports menjadi contoh kategori dengan performa paling optimal karena unggul pada seluruh indikator utama.
+
+
+---
+
+## Kesimpulan Insight Bisnis
+
+Berdasarkan seluruh hasil analisis, kategori Sports merupakan kategori film dengan performa terbaik pada database Sakila karena memiliki jumlah rental dan total pendapatan tertinggi. Selain itu, kategori Sci-Fi dan Animation juga menunjukkan performa yang sangat baik.
+
+Kategori seperti Comedy memiliki rata-rata transaksi tertinggi, yang menunjukkan bahwa setiap transaksi pada kategori tersebut menghasilkan nilai pembayaran yang besar.
+
+Sementara itu, kategori Music, Travel, dan Classics menunjukkan performa yang relatif rendah sehingga memerlukan evaluasi lebih lanjut dari sisi promosi, kualitas katalog, maupun strategi pemasaran.
+
+Hasil analisis ini menunjukkan bahwa pengelolaan inventori dan strategi bisnis berbasis data sangat penting untuk meningkatkan efektivitas serta profitabilitas perusahaan rental film.
+
+---
+
+# Kesimpulan
+
+Berdasarkan hasil analisis database Sakila, kategori Sports merupakan kategori dengan performa terbaik berdasarkan jumlah rental maupun total pendapatan. Hasil korelasi menunjukkan bahwa frekuensi rental memiliki hubungan positif yang kuat terhadap pendapatan perusahaan.
+
+Visualisasi data memperlihatkan bahwa kategori dengan jumlah rental tinggi cenderung menghasilkan revenue lebih besar. Oleh karena itu, perusahaan disarankan untuk memprioritaskan pengembangan inventori pada kategori dengan performa tinggi serta melakukan evaluasi terhadap kategori dengan performa rendah.
+
+Analisis ini menunjukkan bahwa pemanfaatan data transaksi dapat membantu perusahaan dalam mengambil keputusan bisnis secara lebih efektif dan berbasis data.
+
+# Menutup Koneksi Database
+
+```{r}
+dbDisconnect(con)
+```
